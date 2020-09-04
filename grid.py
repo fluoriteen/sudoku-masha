@@ -13,17 +13,20 @@ class Grid :
     def __init__(self, root_n: int, values = {}) :
         self.root_n = root_n
         self.n = root_n**2
+        self.arr = [-1] * root_n**4   
         self.values = values
-        self.arr = [-1] * root_n**4
-        self.matrix = [[-1] * root_n**2] * root_n**2
+        self.box_map = {}
 
         for i in range(self.n) :
             for j in range(self.n) :
                 key = str(i+1) + ',' + str(j+1)
+                index = i*self.n + j%self.n
 
+                self.box_map.update({index: (j//self.root_n + 1) + (i//self.root_n)*self.root_n})
+
+                # Check for existing values - todo: optional?
                 if key in self.values  :
-                    self.matrix[i][j] = self.values[key]
-                    self.arr[i*self.n + j%self.n] = self.values[key]
+                    self.arr[index] = self.values[key]
     
 
     def format(self, val: str, *args) -> str :
@@ -57,7 +60,7 @@ class Grid :
         if not show : 
             return ''
         
-        return f"{i+1}"
+        return str(i)
 
 
     def str_coordinate(self, show: bool, p: int, q: int) -> str :
