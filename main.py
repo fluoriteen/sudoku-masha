@@ -6,13 +6,16 @@ class Sudoku :
         self.grid = Grid(3, clues)
         self.clues = clues
         self.n = 9
+        self.solved = False
 
     def solve_cell(self, i: int, rows_cache: list, cols_cache: list) :
         row = i // self.n + 1
         col = i % self.n + 1
 
         if row > self.n :
-            return False
+            
+            return self.grid.arr
+
 
         row_cache = rows_cache[row]
         col_cache = cols_cache[col]
@@ -32,12 +35,16 @@ class Sudoku :
                     self.grid.arr[i] = -1
                     del row_cache[j]
                     del col_cache[j]
+
+
+                    # out of loop if sudoku solved
+                    if self.solved :
+                        break
             
-            self.visualize()
+            # if none of 1..9 numbers fits conditions take step back
             return False
                 
         
-        self.visualize()    
         return self.solve_cell(i+1, rows_cache, cols_cache)
 
     def solve(self) :
@@ -51,16 +58,25 @@ class Sudoku :
             rows_cache[i].update({self.clues[coords]: True})
             cols_cache[j].update({self.clues[coords]: True})
 
-        self.solve_cell(0, rows_cache, cols_cache)
+        # show initial sudoku
         self.visualize()
+
+        # solve sudoku
+        self.solve_cell(0, rows_cache, cols_cache)
+
+        # show solution
+        self.visualize() 
+            print('================================================' * 6)
 
 
     def visualize(self) :
         self.grid.visualize()
 
+
+
 # ==================================================
 # ==================================================
-s = Sudoku(Test.case_1)
+s = Sudoku(Test.case_2)
 s.solve()
 
     
