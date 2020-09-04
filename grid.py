@@ -19,14 +19,8 @@ class Grid :
 
         for i in range(self.n) :
             for j in range(self.n) :
-                key = str(i+1) + ',' + str(j+1)
                 index = i*self.n + j%self.n
-
-                self.box_map.update({index: (j//self.root_n + 1) + (i//self.root_n)*self.root_n})
-
-                # Check for existing values - todo: optional?
-                if key in self.values  :
-                    self.arr[index] = self.values[key]
+                self.box_map.update({index: (j // self.root_n + i // self.root_n * self.root_n)  })
     
 
     def format(self, val: str, *args) -> str :
@@ -53,7 +47,7 @@ class Grid :
         if key in self.values :
             return self.format(f"{self.values[key]}", 'bold', 'yellow')
         
-        return self.format(f"{self.arr[i] if self.arr[i] != -1 else '-'}", 'bold', 'green')
+        return self.format(f"{self.arr[i] if self.arr[i] != -1 else '-'}", 'bold', 'blue')
 
 
     def str_index(self, show: bool, i: int) -> str :

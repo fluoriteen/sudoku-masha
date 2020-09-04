@@ -4,44 +4,42 @@ from tests import Test
 class Sudoku :
     def __init__(self, clues = {}) :
         self.grid = Grid(3, clues)
-        self.clues = clues
         self.n = 9
+        self.clues = clues
         self.solved = False
 
-    def check_col_sum(self, i: int) :
-        counter = 0
+        # Rows, Cols and Boxes caches
+        self.r_cache = [dict() for x in range(self.n)]
+        self.c_cache = [dict() for y in range(self.n)]
+        self.b_cache = [dict() for z in range(self.n)]
 
-        while i > 0 :
-            counter += self.grid.arr[i]
-            i -= 9            
+        # Analysis
+        self.counter = 0
 
-        return True if counter == 45 else False
 
-    def solve_cell(self, i: int, rows_cache: list, cols_cache: list, boxs_cache: list) :
-        #if row == self.n and col > 1 : 
-        #    check = self.check_col_sum(i-1)
-        #    if not check :
-        #        return False
-
+    def solve_cell(self, i: int) :
+        
         if i > self.n**2 - 1 :
             self.solved = True
-            return self.grid.arr
+            return True
 
-        row = i // self.n + 1
-        col = i % self.n + 1
+        row = i // self.n
+        col = i % self.n
         box = self.grid.box_map[i]
 
-        if self.grid.arr[i] == -1:
+        key = str(row+1) + ',' + str(col+1)
+
+        if key not in self.clues:
             for j in range(1,10) :
-                if j not in rows_cache[row] and j not in cols_cache[col] and j not in boxs_cache[box] :
+                if j not in self.r_cache[row] and j not in self.c_cache[col] and j not in self.b_cache[box] :
                     # choose
                     self.grid.arr[i] = j
-                    rows_cache[row].update({j: True})
-                    cols_cache[col].update({j: True})
-                    boxs_cache[box].update({j: True})
+                    self.r_cache[row].update({j: True})
+                    self.c_cache[col].update({j: True})
+                    self.b_cache[box].update({j: True})
 
                     # explore
-                    self.solve_cell(i+1, rows_cache, cols_cache, boxs_cache)
+                    self.solve_cell(i+1)
 
                     # out of loop if sudoku solved
                     if self.solved :
@@ -49,38 +47,38 @@ class Sudoku :
 
                     # unchoose
                     self.grid.arr[i] = -1
-                    del rows_cache[row][j]
-                    del cols_cache[col][j] 
-                    del boxs_cache[box][j]
+                    del self.r_cache[row][j]
+                    del self.c_cache[col][j] 
+                    del self.b_cache[box][j]
             
             # if none of 1..9 numbers fits conditions take step back
             return False
+
+        else : 
+            self.grid.arr[i] = self.clues[key] 
                 
         
-        return self.solve_cell(i+1, rows_cache, cols_cache, boxs_cache)
+        return self.solve_cell(i+1)
+
 
     def solve(self) :
-        # todo: +1 empty dict here
-        rows_cache = [dict() for x in range(self.n+1)]
-        cols_cache = [dict() for y in range(self.n+1)]
-        boxs_cache = [dict() for z in range(self.n+1)]
-
         # Pre-processing for initial cache
         for coords in self.clues :
-            i, j = [int(i) for i in coords.split(',')]
-            rows_cache[i].update({self.clues[coords]: True})
-            cols_cache[j].update({self.clues[coords]: True})
-            box = self.grid.box_map[(i-1)*self.n + (j-1)%self.n]
-            boxs_cache[box].update({self.clues[coords]: True})
+            i, j = [(int(c) - 1) for c in coords.split(',')]
+            self.r_cache[i].update({self.clues[coords]: True})
+            self.c_cache[j].update({self.clues[coords]: True})
+
+            box = self.grid.box_map[i*self.n + j%self.n]
+            self.b_cache[box].update({self.clues[coords]: True})
 
         # show initial sudoku
         # self.visualize()
 
         # solve sudoku
-        self.solve_cell(0, rows_cache, cols_cache, boxs_cache)
+        self.solve_cell(0)
 
         # show solution
-        self.visualize() 
+        self.visualize()
         print('================================================' * 6)
 
 
@@ -91,7 +89,9 @@ class Sudoku :
 
 # ==================================================
 # ==================================================
-s = Sudoku(Test.case_1)
+s1 = Sudoku(Test.case_1)
+s = Sudoku(Test.case_3)
+
 s.solve()
 
     
