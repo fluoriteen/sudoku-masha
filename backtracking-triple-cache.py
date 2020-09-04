@@ -1,7 +1,7 @@
 from grid import Grid
 from tests import Test
 
-class Sudoku :
+class SudokuBacktracking :
     def __init__(self, clues = {}) :
         self.grid = Grid(3, clues)
         self.n = 9
@@ -18,7 +18,7 @@ class Sudoku :
 
 
     def solve_cell(self, i: int) :
-        
+        # If we're out of sudoku array - quit recursion
         if i > self.n**2 - 1 :
             self.solved = True
             return True
@@ -26,7 +26,6 @@ class Sudoku :
         row = i // self.n
         col = i % self.n
         box = self.grid.box_map[i]
-
         key = str(row+1) + ',' + str(col+1)
 
         if key not in self.clues:
@@ -62,7 +61,7 @@ class Sudoku :
 
 
     def solve(self) :
-        # Pre-processing for initial cache
+        # Pre-processing for initial caches
         for coords in self.clues :
             i, j = [(int(c) - 1) for c in coords.split(',')]
             self.r_cache[i].update({self.clues[coords]: True})
@@ -71,27 +70,21 @@ class Sudoku :
             box = self.grid.box_map[i*self.n + j%self.n]
             self.b_cache[box].update({self.clues[coords]: True})
 
-        # show initial sudoku
-        # self.visualize()
 
         # solve sudoku
         self.solve_cell(0)
 
         # show solution
-        self.visualize()
-        print('================================================' * 6)
+        self.grid.visualize() 
+        print('==============================' * 6)
 
-
-    def visualize(self, show_coords = False, show_indices = False) :
-        self.grid.visualize(show_coords, show_indices)
 
 
 
 # ==================================================
 # ==================================================
-s1 = Sudoku(Test.case_1)
-s = Sudoku(Test.case_3)
 
+s = SudokuBacktracking(Test.case_5)
 s.solve()
 
     
