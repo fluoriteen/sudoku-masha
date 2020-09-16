@@ -15,12 +15,6 @@ class Grid :
         self.n = root_n**2
         self.arr = [-1] * root_n**4   
         self.values = values
-        self.box_map = {}
-
-        for i in range(self.n) :
-            for j in range(self.n) :
-                index = i*self.n + j%self.n
-                self.box_map.update({index: (j // self.root_n + i // self.root_n * self.root_n)  })
     
 
     def format(self, val: str, *args) -> str :
