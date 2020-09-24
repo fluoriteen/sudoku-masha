@@ -9,75 +9,74 @@ class SudokuBacktracking :
         self.solved = False
         self.box_map = {}
 
-        # Index to block number
-        for i in range(self.n) :
-            for j in range(self.n) :
-                index = i*self.n + j%self.n
-                self.box_map.update({index: (j // 3 + i // 3 * 3)  })
-
         # Rows, Cols and Boxes caches
-        self.r_cache = [dict() for x in range(self.n)]
-        self.c_cache = [dict() for y in range(self.n)]
-        self.b_cache = [dict() for z in range(self.n)]
-
-        # Analysis
-        self.counter = 0
+        r = range(self.n)
+        self.r_cache = [[0]*(self.n+1) for _ in r]
+        self.c_cache = [[0]*(self.n+1) for _ in r]
+        self.b_cache = [[0]*(self.n+1) for _ in r]
 
 
-    def solve_cell(self, i: int) :
+    def fill_caches(self) :
+        for row in range(self.n) :
+            for col in range(self.n) :
+                coord = f"{row+1}{col+1}"
+                box = row // 3 + col // 3 * 3
+
+                self.box_map.update({coord: box})
+
+                if coord in self.clues :
+                    clue = self.clues[coord]
+                    self.grid.arr[(row * self.n) + col] = clue
+                    self.r_cache[row][clue] = 1
+                    self.c_cache[col][clue] = 1
+                    self.b_cache[box][clue] = 1
+
+
+    def solve_cell(self, idx: int) :
         # If we're out of sudoku array - quit recursion
-        if i > self.n**2 - 1 :
+        if idx > self.n**2 - 1 :
             self.solved = True
             return True
 
-        row = i // self.n
-        col = i % self.n
-        box = self.box_map[i]
-        key = str(row+1) + ',' + str(col+1)
+        row = idx // self.n
+        col = idx % self.n
+        box = self.box_map[f"{row+1}{col+1}"]
 
-        if key not in self.clues:
-            for j in range(1,10) :
-                if j not in self.r_cache[row] and j not in self.c_cache[col] and j not in self.b_cache[box] :
+        if self.grid.arr[idx] == 0:
+            for k in range(1,10) :
+                if self.r_cache[row][k] + self.c_cache[col][k] + self.b_cache[box][k] == 0 :
                     
                     # choose
-                    self.grid.arr[i] = j
-                    self.r_cache[row].update({j: True})
-                    self.c_cache[col].update({j: True})
-                    self.b_cache[box].update({j: True})
+                    self.grid.arr[idx] = k
+                    self.r_cache[row][k] = 1
+                    self.c_cache[col][k] = 1
+                    self.b_cache[box][k] = 1
 
-                    # explore // and break if exploring returned True
-                    if self.solve_cell(i+1) : break
+                    # explore and break if exploring returned True
+                    if self.solve_cell(idx+1) : break
                     
                     # unchoose
-                    self.grid.arr[i] = -1
-                    del self.r_cache[row][j]
-                    del self.c_cache[col][j] 
-                    del self.b_cache[box][j]
+                    self.grid.arr[idx] = 0
+                    self.r_cache[row][k] = 0
+                    self.c_cache[col][k] = 0
+                    self.b_cache[box][k] = 0
             
             # if all 1..9 numbers were checked return current puzzle state and take step back
+            # print('=======================================================================================================')
+            # self.grid.visualize() 
             return self.solved
 
-        else : 
-            self.grid.arr[i] = self.clues[key] 
-                
         
-        return self.solve_cell(i+1)
+        return self.solve_cell(idx+1)
 
 
     def solve(self) :
         # initial sudoku grid
         self.grid.visualize() 
 
-        # Pre-processing for initial caches
-        for coords in self.clues :
-            i, j = [(int(c) - 1) for c in coords.split(',')]
-            self.r_cache[i].update({self.clues[coords]: True})
-            self.c_cache[j].update({self.clues[coords]: True})
-
-            box = self.box_map[i*self.n + j%self.n]
-            self.b_cache[box].update({self.clues[coords]: True})
-
-
+        # pre-processing for initial caches: rows, cols, boxes
+        self.fill_caches()
+          
         # solve sudoku
         self.solve_cell(0)
 
@@ -85,12 +84,9 @@ class SudokuBacktracking :
         self.grid.visualize() 
 
 
-
-
 # ==================================================
 # ==================================================
-
-s = SudokuBacktracking(Test.case_5)
-s.solve()
+game = SudokuBacktracking(Test.case_7)
+game.solve()
 
     
