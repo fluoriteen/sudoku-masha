@@ -1,26 +1,50 @@
-from grid import Grid
+import time
 from tests import Tests
+
 from listscache import ListsCacheSolution
+from bitwisecache import BitwiseCacheSolution
 
 class SudokuBacktracking :
-    def __init__(self, clues = {}, root_n = 3, name = '') :
+    def __init__(self, clues: dict, name = '', root_n = 3) :
         self.root_n = root_n
         self.n = root_n**2
 
-        self.grid = Grid(root_n, clues)
-        self.clues = clues
-        
         self.name = name
-        self.solved = False
+        self.clues = clues
+        self.is_solved = False
 
         self.processors = {
-            'listscache': ListsCacheSolution
+            'listscache': ListsCacheSolution,
+            'bitwisecache': BitwiseCacheSolution
         }
 
-    
-    def output_result(self) :
+        # analysis
+        # - preprocessing timing
+        # - solving timing
+        # - count choose (recursive calls)
+        # - count unchoose
+        self.metrics = [0, 0, 0, 0]
+
+
+    def display(self, processor: str) :
         res = 'No solution found'
 
+        if self.is_solved :
+            res = self.grid.visual(False, False)
+
+        print(f''' 
+                \r {self.name} / {processor}
+                \r number of clues: {len(self.clues)}
+
+                \r preprocessing time: {self.metrics[0]*1000:.3f}ms 
+                \r solving time: {self.metrics[1]:.3f}s
+
+                \r count choose: {self.metrics[2]}
+                \r count unchoose: {self.metrics[3]}
+                \r {res}''')
+
+    
+    def validate(self) :
         ref_sum = 45
 
         for i in range(self.n) :
@@ -33,26 +57,34 @@ class SudokuBacktracking :
                 break
 
         if 0 not in self.grid.arr and ref_sum == 45 :
-            res = self.grid.visual(False, False)
-
-        print(f''' {self.name}
-                \r timing: {self.timing:.2f}s 
-                \r number of clues: {len(self.clues)}
-                \r number of choose: {self.counters[0]}
-                \r number of unchoose: {self.counters[1]}
-                \r{res}
-            ''')
+            self.is_solved = True
 
 
-    def solve(self, processor = 'listscache') :
-        # initial sudoku grid
-        # print(self.grid.visual())
+    def solve(self, processor = 'bitwisecache') :
+        s = self.processors[processor](self.clues, self.root_n)
+        self.grid = s.grid
+        self.metrics = s.metrics
 
-        s = self.processors[processor](self.grid, self.clues, self.root_n)
-        self.grid.arr, self.counters, self.timing = s.solve()
+        # show initial sudoku grid
+        # print(s.grid.visual())
+
+        # pre-process
+        ts_preprocessing = time.time()
+        s.preprocess()
+          
+        # solve sudoku
+        ts_solving = time.time()
+        s.solve(0)
+
+        # check solution
+        self.validate()
+        
+        # record timing
+        self.metrics[1] = time.time() - ts_solving
+        self.metrics[0] = ts_solving - ts_preprocessing
 
         # show solution
-        self.output_result()
+        self.display(processor)
 
 
 # ==================================================
@@ -60,11 +92,13 @@ class SudokuBacktracking :
 
 # for name in dir(Tests):
 #     if not name.startswith('__') :
-#         game = SudokuBacktracking(getattr(Tests, name), 3, name)
+#         game = SudokuBacktracking(getattr(Tests, name), name)
 #         game.solve()
 
 
 # ==================================================
 # ==================================================
-game = SudokuBacktracking(Tests.case_3, 3, 'case_3')
-game.solve()
+
+game = SudokuBacktracking(Tests.case_5)
+game.solve('listscache')
+game.solve('bitwisecache')
