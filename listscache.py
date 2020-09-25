@@ -1,15 +1,14 @@
 import time
-import sys
 from grid import Grid
-from tests import Tests
 
-class SudokuBacktracking :
-    def __init__(self, clues = {}, root_n = 3, name = '') :
-        self.name = name
+class ListsCacheSolution :
+    def __init__(self, grid: Grid, clues: dict, root_n = 3) :
         self.root_n = root_n
-        self.grid = Grid(root_n, clues)
         self.n = root_n**2
+
+        self.grid = grid
         self.clues = clues
+        
         self.solved = False
         self.box_map = {}
 
@@ -19,36 +18,8 @@ class SudokuBacktracking :
         self.c_cache = [([None] + [0]*self.n) for _ in r]
         self.b_cache = [([None] + [0]*self.n) for _ in r]
 
-        # Analysis 
-        self.start_time = time.time()
         self.choose_counter = 0
         self.unchoose_counter = 0
-
-    
-    def output_result(self) :
-        res = 'No solution found'
-
-        ref_sum = 45
-
-        for i in range(self.n) :
-            row_sum = 0
-            for j in range(self.n) :
-                row_sum += self.grid.arr[(i * self.n) + j]
-            
-            if row_sum != ref_sum :
-                ref_sum = row_sum
-                break
-
-        if 0 not in self.grid.arr and ref_sum == 45 :
-            res = self.grid.visual(False, False)
-
-        print(f''' {self.name}
-                \r timing: {time.time() - self.start_time:.2f}s 
-                \r number of clues: {len(self.clues)}
-                \r number of choose: {self.choose_counter}
-                \r number of unchoose: {self.unchoose_counter}
-                \r{res}
-            ''')
 
 
     def fill_caches(self) :
@@ -91,11 +62,8 @@ class SudokuBacktracking :
                     self.b_cache[box][k] = 1
 
                     # explore and break if exploring returned True
-                    if self.solve_cell(idx+1) : 
-                        break
-                    else :
-                        self.unchoose_counter += 1
-
+                    if self.solve_cell(idx+1) : break
+                    self.unchoose_counter += 1
 
                     # unchoose
                     self.grid.arr[idx] = 0
@@ -115,29 +83,12 @@ class SudokuBacktracking :
 
 
     def solve(self) :
-        # initial sudoku grid
-        # print(self.grid.visual())
-
         # pre-processing for initial caches: rows, cols, boxes
         self.fill_caches()
           
         # solve sudoku
+        ts = time.time()
         self.solve_cell(0)
+        te = time.time()
 
-        # show solution
-        self.output_result()
-
-
-# ==================================================
-# ==================================================
-
-# for name in dir(Tests):
-#     if not name.startswith('__') :
-#         game = SudokuBacktracking(getattr(Tests, name), 3, name)
-#         game.solve()
-
-
-# ==================================================
-# ==================================================
-game = SudokuBacktracking(Tests.case_3, 3, 'case_3')
-game.solve()
+        return [self.grid.arr, [self.choose_counter, self.unchoose_counter], te - ts]
