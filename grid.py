@@ -1,3 +1,4 @@
+import sys
 class Grid :
     def __init__(self, root_n: int, values = {}) :
         self.root_n = root_n
@@ -33,7 +34,7 @@ class Grid :
 
 
     def str_value(self, idx: int, row: int, col: int) -> str :
-        key = f"{row}{col}"
+        key = f"{row} {col}"
 
         if key in self.values :
             return self.format(f"{self.values[key]}", 'bold', 'yellow')
@@ -55,12 +56,12 @@ class Grid :
         return self.format(f"({row},{col})", 'green')
    
 
-    def visualize(self, with_coord = False, with_index = False) :
+    def visual(self, with_coord = False, with_index = False) -> str :
         str_row_sep = '\n'
-        str_col_sep = '\t\t'
+        str_col_sep = '   '
         str_val_sep = '  '
         
-        print(str_row_sep)
+        str_res = str_row_sep
 
         str_row = ''
         for i in range(self.n**2) :            
@@ -78,5 +79,8 @@ class Grid :
             str_row += str_val_sep * (col % self.root_n != 0)
             
             if col % self.n == 0 :
-                print(f"{str_row}{str_row_sep * (row % self.root_n == 0)}")
+                row_div = (row % self.root_n == 0)
+                str_res += f"{str_row}{str_row_sep * (1 + row_div)}"
                 str_row = ''
+
+        return str_res
