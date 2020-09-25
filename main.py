@@ -48,7 +48,7 @@ class SudokuBacktracking :
         # initial sudoku grid
         # print(self.grid.visual())
 
-        s = self.processors[processor](self.grid.arr, self.clues, self.root_n)
+        s = self.processors[processor](self.grid, self.clues, self.root_n)
         self.grid.arr, self.counters, self.timing = s.solve()
 
         # show solution

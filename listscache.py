@@ -89,6 +89,6 @@ class ListsCacheSolution :
         # solve sudoku
         ts = time.time()
         self.solve_cell(0)
-        te = time.time()
+        timing = time.time() - ts
 
-        return [self.grid.arr, [self.choose_counter, self.unchoose_counter], te - ts]
+        return [self.grid.arr, [self.choose_counter, self.unchoose_counter], timing]
