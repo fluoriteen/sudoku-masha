@@ -21,7 +21,8 @@ class SudokuBacktracking :
 
         # Analysis 
         self.start_time = time.time()
-        self.recursive_counter = 0
+        self.choose_counter = 0
+        self.unchoose_counter = 0
 
     
     def output_result(self) :
@@ -39,12 +40,13 @@ class SudokuBacktracking :
                 break
 
         if 0 not in self.grid.arr and ref_sum == 45 :
-            res = self.grid.visual()
+            res = self.grid.visual(False, False)
 
         print(f''' {self.name}
                 \r timing: {time.time() - self.start_time:.2f}s 
                 \r number of clues: {len(self.clues)}
-                \r number of recursive calls: {self.recursive_counter}
+                \r number of choose: {self.choose_counter}
+                \r number of unchoose: {self.unchoose_counter}
                 \r{res}
             ''')
 
@@ -66,7 +68,7 @@ class SudokuBacktracking :
 
 
     def solve_cell(self, idx: int) :
-        self.recursive_counter += 1
+        self.choose_counter += 1
 
         # If we're out of sudoku array - quit recursion
         if idx > self.n**2 - 1 :
@@ -89,8 +91,12 @@ class SudokuBacktracking :
                     self.b_cache[box][k] = 1
 
                     # explore and break if exploring returned True
-                    if self.solve_cell(idx+1) : break
-                    
+                    if self.solve_cell(idx+1) : 
+                        break
+                    else :
+                        self.unchoose_counter += 1
+
+
                     # unchoose
                     self.grid.arr[idx] = 0
                     self.r_cache[row][k] = 0
@@ -110,8 +116,8 @@ class SudokuBacktracking :
 
     def solve(self) :
         # initial sudoku grid
-        print(self.grid.visual())
-        
+        # print(self.grid.visual())
+
         # pre-processing for initial caches: rows, cols, boxes
         self.fill_caches()
           
@@ -133,5 +139,5 @@ class SudokuBacktracking :
 
 # ==================================================
 # ==================================================
-game = SudokuBacktracking(Tests.case_5, 3, 'case_5')
+game = SudokuBacktracking(Tests.case_3, 3, 'case_3')
 game.solve()

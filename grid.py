@@ -39,7 +39,7 @@ class Grid :
         if key in self.values :
             return self.format(f"{self.values[key]}", 'bold', 'yellow')
         
-        return self.format(f"{self.arr[idx] if self.arr[idx] != 0 else '-'}", 'bold', 'blue')
+        return self.format(f"{self.arr[idx]}", 'bold', 'blue') if self.arr[idx] != 0 else '0'
 
 
     def str_index(self, show: bool, idx: int) -> str :
