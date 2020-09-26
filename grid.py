@@ -5,6 +5,9 @@ class Grid :
         self.n = root_n**2
         self.arr = [0] * root_n**4
         self.values = values
+
+        self.span = self.root_n // 2
+        self.no_val = (self.span-1)*' ' + '-'
         
         self.formatters = {
             'header': '\033[95m',
@@ -35,18 +38,18 @@ class Grid :
 
     def str_value(self, idx: int, row: int, col: int) -> str :
         key = f"{row} {col}"
-
-        if key in self.values :
-            return self.format(f"{self.values[key]}", 'bold', 'yellow')
         
-        return self.format(f"{self.arr[idx]}", 'bold', 'blue') if self.arr[idx] != 0 else '0'
+        if key in self.values :
+            return self.format(f"{self.values[key]:>{self.span}d}", 'bold', 'yellow')
+        
+        return self.format(f"{self.arr[idx]:>{self.span}d}", 'bold', 'blue') if self.arr[idx] != 0 else self.no_val
 
 
     def str_index(self, show: bool, idx: int) -> str :
         if not show : 
             return ''
         
-        return f"{' ' if idx < 10 else ''}{idx}"
+        return f"{idx:{''}>2d}"
 
 
     def str_coord(self, show: bool, row: int, col: int) -> str :
@@ -58,7 +61,7 @@ class Grid :
 
     def visual(self, with_coord = False, with_index = False) -> str :
         str_row_sep = '\n'
-        str_col_sep = '   '
+        str_col_sep = '     '
         str_val_sep = '  '
         
         str_res = str_row_sep

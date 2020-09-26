@@ -30,7 +30,7 @@ class SudokuBacktracking :
         res = 'No solution found'
 
         if self.is_solved :
-            res = self.grid.visual(False, False)
+            res = self.grid.visual()
 
         print(f''' 
                 \r {self.name} / {processor}
@@ -45,7 +45,9 @@ class SudokuBacktracking :
 
     
     def validate(self) :
-        ref_sum = 45
+        # referral sum is the sum of all candidates appearing in each row (col, box)
+        # it's the sum of first n items of arithmetic progression: 1..n 
+        ref_sum = int(0.5 * (1 + self.n) * self.n)
 
         for i in range(self.n) :
             row_sum = 0
@@ -99,6 +101,6 @@ class SudokuBacktracking :
 # ==================================================
 # ==================================================
 
-game = SudokuBacktracking(Tests.case_5)
+game = SudokuBacktracking(Tests.case_3, 'case 3', 3)
 game.solve('listscache')
-game.solve('bitwisecache')
+# game.solve('bitwisecache')
