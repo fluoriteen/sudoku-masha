@@ -1,8 +1,8 @@
-# import time
+import time
 from grid import Grid
 
 class ListsCacheSolution :
-    def __init__(self, clues: dict, metrics: list, root_n = 3) :
+    def __init__(self, clues: dict, root_n = 3) :
         self.root_n = root_n
         self.n = root_n**2
 
@@ -15,9 +15,9 @@ class ListsCacheSolution :
 
         # rows, cols and boxes list caches
         r = range(self.n)
-        self.r_cache = [([None] + [0]*self.n) for _ in r]
-        self.c_cache = [([None] + [0]*self.n) for _ in r]
-        self.b_cache = [([None] + [0]*self.n) for _ in r]
+        self.r_cache = [[False]*(self.n+1) for _ in r]
+        self.c_cache = [[False]*(self.n+1) for _ in r]
+        self.b_cache = [[False]*(self.n+1) for _ in r]
 
 
     def preprocess(self) :
@@ -50,13 +50,13 @@ class ListsCacheSolution :
         if self.grid.arr[idx] == 0:
             for k in range(1,self.n+1) :
 
-                if self.r_cache[row][k] + self.c_cache[col][k] + self.b_cache[box][k] == 0 :
+                if (self.r_cache[row][k] or self.c_cache[col][k] or self.b_cache[box][k]) == False :
                  
                     # choose
                     self.grid.arr[idx] = k
-                    self.r_cache[row][k] = 1
-                    self.c_cache[col][k] = 1
-                    self.b_cache[box][k] = 1
+                    self.r_cache[row][k] = True
+                    self.c_cache[col][k] = True
+                    self.b_cache[box][k] = True
 
                     # explore and break if exploring returned True
                     if self.solve(idx+1) : break
@@ -64,14 +64,14 @@ class ListsCacheSolution :
 
                     # unchoose
                     self.grid.arr[idx] = 0
-                    self.r_cache[row][k] = 0
-                    self.c_cache[col][k] = 0
-                    self.b_cache[box][k] = 0
+                    self.r_cache[row][k] = False
+                    self.c_cache[col][k] = False
+                    self.b_cache[box][k] = False
 
             # if all 1..9 numbers were checked return current puzzle state and take step back
             # print(self.grid.visual())
             # print('\r')
-            # time.sleep(0.05)
+            # time.sleep(0.1)
             return self.is_finished
 
         return self.solve(idx+1)
