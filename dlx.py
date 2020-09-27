@@ -102,6 +102,10 @@ class DLXSolution :
                 if coord in self.clues :
                     clue = self.clues[coord]
                     self.grid.arr[idx] = clue
+
+                    if r_cache[row][clue] or c_cache[col][clue] or b_cache[box][clue] :
+                        raise Exception(f'Duplicates found. Conflict at: {coord}')
+
                     r_cache[row][clue] = True
                     c_cache[col][clue] = True
                     b_cache[box][clue] = True
@@ -163,7 +167,7 @@ class DLXSolution :
                 # choose // add current state to solution
                 self.metrics['count_choose'] += 1
                 self.grid.arr[idx] = state['r'][1]
-                # self.grid.show_step()
+                # self.grid.show_step(0.03)
                 
                 # explore further, increasing depth
                 if self.solve(depth + 1) : break
@@ -171,7 +175,7 @@ class DLXSolution :
                 # unchoose // remove current state from solution
                 self.metrics['count_unchoose'] += 1
                 self.grid.arr[idx] = 0
-                # self.grid.show_step()
+                # self.grid.show_step(0.03)
 
                 # move left
                 pointer = pointer.left
