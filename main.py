@@ -54,6 +54,7 @@ class Sudoku :
         # referral sum is the sum of all candidates appearing in each row (col, box)
         # it's the sum of first n items of arithmetic progression: 1..n 
         ref_sum = int(0.5 * (1 + self.n) * self.n)
+        
 
         for i in range(self.n) :
             row_sum = 0
@@ -61,11 +62,11 @@ class Sudoku :
                 row_sum += self.grid.arr[(i * self.n) + j]
             
             if row_sum != ref_sum :
-                ref_sum = row_sum
-                break
+                self.is_solved = False
+                return False
 
-        if 0 not in self.grid.arr and ref_sum == 45 :
             self.is_solved = True
+            return True
 
 
     def solve(self, processor = 'dlx') :
@@ -73,7 +74,7 @@ class Sudoku :
         self.grid, self.metrics = s.grid, s.metrics
 
         # show initial sudoku grid
-        # print(s.grid.visual())
+        print(s.grid.visual())
 
         # pre-process
         ts_preprocessing = time.time()
@@ -107,5 +108,5 @@ class Sudoku :
 # ==================================================
 # ==================================================
 
-game = Sudoku(Tests.case_5, 'case 3', 3)
+game = Sudoku(Tests.case_13, 'case 13', 4)
 game.solve()
