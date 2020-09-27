@@ -1,9 +1,10 @@
 import time
-from tests import Tests
 
-from listscache import BruteforceSolution
-from bitwisecache import BitwiseSolution
+from bruteforce import BruteforceSolution
+from bitwise import BitwiseSolution
 from dlx import DLXSolution
+
+from utils.tests import Tests
 
 class Sudoku :
     def __init__(self, clues: dict, name = '', root_n = 3) :
@@ -21,10 +22,6 @@ class Sudoku :
         }
 
         # analysis
-        # - preprocessing timing
-        # - solving timing
-        # - count choose (recursive calls)
-        # - count unchoose
         self.metrics = {
             'preprocessing': 0,
             'solving': 0,
@@ -111,5 +108,4 @@ class Sudoku :
 # ==================================================
 
 game = Sudoku(Tests.case_5, 'case 3', 3)
-# game.solve()
-game.solve('bruteforce')
+game.solve()
