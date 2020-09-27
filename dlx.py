@@ -28,11 +28,6 @@ class DoubleLinkedList:
         self.head = Header('root')
         self.head.up, self.head.down = self.head, self.head
         self.tail = self.head
-
-        self.length = 0
-        self.cell_head = None
-        self.cell_tail = None
-
         self.rows = []
 
 
@@ -50,11 +45,8 @@ class DoubleLinkedList:
         self.head.left = new
         self.tail = new
 
-        self.length += 1
-        return new
 
-
-    def add_cell(self, col_name: str) :
+    def add_cell(self, col_name: str) -> Cell :
         new = Cell()
 
         # find column for new cell
@@ -70,27 +62,25 @@ class DoubleLinkedList:
         new.down = col
         new.up.down = new
         new.down.up = new
-
-        # integrate new cell in a row
-        # if this is the very first cell
-        if self.cell_head is None :
-            new.left = new
-            new.right = new
-            self.cell_head = new
-
-        # but if there are cells in columns already
-        else :
-            # update current cell left and right links
-            new.left = self.cell_tail
-            new.right = self.cell_head
-
-            # update head left link and tail right
-            new.left.right = new
-            self.cell_head.left = new
-        
-        self.cell_tail = new
         return new
     
+    
+    def add_circular_links(self, period: int) :
+        period -= 1
+        i = 0
+        while i < len(self.rows) - 1 :
+            # go through every group of constraints (period) and link them in circle
+            left = self.rows[i + period]
+            
+            for j in range(period) :
+                current = self.rows[i + j]
+                current.left, current.right = left, self.rows[i + j + 1]
+                left = current
+
+            current = self.rows[i + period]
+            current.left, current.right = left, self.rows[i]
+
+            i += period + 1
 
         
 class DLXSolution :
@@ -188,10 +178,12 @@ class DLXSolution :
 
         # fill caches
         for row in rng :
+            i = row * self.n
+            b = row // self.root_n * self.root_n
             for col in rng :
+                idx = i + col
+                box = b + col // self.root_n
                 coord = f"{row+1} {col+1}"
-                idx = row * self.n + col
-                box = row // self.root_n * self.root_n + col // self.root_n
 
                 self.idx_map.update({idx: [row, col, box]})
 
@@ -221,13 +213,15 @@ class DLXSolution :
                 for clue in rng1 :
                     row, col, box = self.idx_map[idx]
                     if (r_cache[row][clue] or c_cache[col][clue] or b_cache[box][clue]) == False :
-                        constraint_first = self.cache.add_cell(f"p:{idx}")
-                        self.cache.add_cell(f"r:{row} {clue}")
-                        self.cache.add_cell(f"c:{col} {clue}")
-                        constraint_last = self.cache.add_cell(f"b:{box} {clue}")
+                        self.cache.rows += [
+                            self.cache.add_cell(f"p:{idx}"),
+                            self.cache.add_cell(f"r:{row} {clue}"),
+                            self.cache.add_cell(f"c:{col} {clue}"),
+                            self.cache.add_cell(f"b:{box} {clue}")
+                        ]
 
-                        constraint_first.left = constraint_last
-                        constraint_last.right = constraint_first
+        # link circles inside rows
+        self.cache.add_circular_links(4)
 
 
     def solve(self, depth: int) :
