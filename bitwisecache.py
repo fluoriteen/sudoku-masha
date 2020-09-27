@@ -1,16 +1,14 @@
-# import time
-from grid import Grid
+from utils.grid import Grid
 
-class BitwiseCacheSolution :
-    def __init__(self, clues: dict, metrics: list, root_n = 3) :
+class BitwiseSolution :
+    def __init__(self, clues: dict, metrics: dict, root_n = 3) :
         self.root_n = root_n
         self.n = root_n**2
 
         self.grid = Grid(root_n, clues)
         self.clues = clues
-        
         self.idx_map = {}
-        self.metrics = [0]*4
+        self.metrics = metrics
         self.is_finished = False
 
         # integer caches for 1..9 rows, 1..9 cols, 1..9 boxes
@@ -37,7 +35,7 @@ class BitwiseCacheSolution :
 
             
     def solve(self, idx: int) :
-        self.metrics[2] += 1
+        self.metrics['count_choose'] += 1
 
         # if we're out of sudoku array - finish and quit recursion
         if idx > self.n**2 - 1 :
@@ -49,6 +47,12 @@ class BitwiseCacheSolution :
         if self.grid.arr[idx] == 0:
             for k in range(1,self.n+1) :
                 p = 1<<(k-1)
+                
+                # display iterations of candidate selection
+                #
+                # self.grid.arr[idx] = k
+                # self.grid.show_step()
+                # self.grid.arr[idx] = 0
 
                 if (self.r_cache[row] & p) + (self.c_cache[col] & p) + (self.b_cache[box] & p) == 0 :
                     
@@ -60,7 +64,7 @@ class BitwiseCacheSolution :
 
                     # explore and break if exploring returned True
                     if self.solve(idx+1) : break
-                    self.metrics[3] += 1
+                    self.metrics['count_unchoose'] += 1
 
                     # unchoose
                     self.grid.arr[idx] = 0
@@ -69,9 +73,6 @@ class BitwiseCacheSolution :
                     self.b_cache[box] &= ~p
 
             # if all 1..9 numbers were checked return current puzzle state and take step back
-            # print(self.grid.visual())
-            # print('\r')
-            # time.sleep(0.06)
             return self.is_finished
 
         return self.solve(idx+1)

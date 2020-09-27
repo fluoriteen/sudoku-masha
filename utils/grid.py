@@ -1,4 +1,5 @@
 import sys
+import time
 class Grid :
     def __init__(self, root_n: int, values = {}) :
         self.root_n = root_n
@@ -58,6 +59,12 @@ class Grid :
             
         return self.format(f"({row},{col})", 'green')
    
+
+    def show_step(self, interval = 0.2) :
+        print(self.visual())
+        print('\r')
+        time.sleep(interval)
+
 
     def visual(self, with_coord = False, with_index = False) -> str :
         str_row_sep = '\n'

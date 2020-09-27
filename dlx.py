@@ -1,95 +1,14 @@
-import time
-import sys
-import copy
-from grid import Grid
-from tests import Tests
-
-class Node: 
-    def __init__(self) :
-        self.up = None
-        self.down = None
-        self.left = None
-        self.right = None
-
-
-class Header(Node):
-    def __init__(self, name: str) :
-        self.name = name
-        self.size = 0
-
-
-class Cell(Node):
-    def __init__(self) :
-        self.col = None
-
-
-class DoubleLinkedList: 
-    def __init__(self, values) :
-        self.head = Header('root')
-        self.head.up, self.head.down = self.head, self.head
-        self.tail = self.head
-        self.rows = []
-
-
-    def add_header(self, name: str) :
-        new = Header(name)
-
-        # update new header links
-        new.up = new
-        new.down = new
-        new.left = self.tail
-        new.right = self.head
-
-        # update head and tail left and right links
-        new.left.right = new
-        self.head.left = new
-        self.tail = new
-
-
-    def add_cell(self, col_name: str) -> Cell :
-        new = Cell()
-
-        # find column for new cell
-        col = self.head
-        while col.name != col_name :
-            col = col.right
-
-        col.size += 1
-        new.col = col
-
-        # integrate new cell in a column
-        new.up = col.up
-        new.down = col
-        new.up.down = new
-        new.down.up = new
-        return new
-    
-    
-    def add_circular_links(self, period: int) :
-        period -= 1
-        i = 0
-        while i < len(self.rows) - 1 :
-            # go through every group of constraints (period) and link them in circle
-            left = self.rows[i + period]
-            
-            for j in range(period) :
-                current = self.rows[i + j]
-                current.left, current.right = left, self.rows[i + j + 1]
-                left = current
-
-            current = self.rows[i + period]
-            current.left, current.right = left, self.rows[i]
-
-            i += period + 1
-
-        
+from utils.grid import Grid
+from utils.llist import Header, DoubleLinkedList
+      
 class DLXSolution :
-    def __init__(self, clues = {}, root_n = 3) :
+    def __init__(self, clues: dict, metrics: dict, root_n = 3) :
         self.root_n = root_n
         self.n = root_n**2
 
         self.grid = Grid(root_n, clues)
         self.clues = clues
+        self.metrics = metrics
         self.is_finished = False
 
 
@@ -157,13 +76,6 @@ class DLXSolution :
         constraint, tokens = col.name.split(':')
         return {constraint: [int(x) for x in tokens.split(' ')]}
     
-
-    def show_step(self) :
-        # uncomment time import in order to create time delay between steps
-        print(self.grid.visual())
-        print('\r')
-        time.sleep(0.1)
-
 
     def preprocess(self) :
         # rows, cols, boxes and positions list caches
@@ -246,17 +158,20 @@ class DLXSolution :
                     state.update(self.get_token(pointer.col))
                     pointer = pointer.right
 
-                # choose // add current state to solution
                 idx = state['p'][0]
+
+                # choose // add current state to solution
+                self.metrics['count_choose'] += 1
                 self.grid.arr[idx] = state['r'][1]
-                self.show_step()
+                # self.grid.show_step()
                 
                 # explore further, increasing depth
                 if self.solve(depth + 1) : break
-                
+
                 # unchoose // remove current state from solution
+                self.metrics['count_unchoose'] += 1
                 self.grid.arr[idx] = 0
-                self.show_step()
+                # self.grid.show_step()
 
                 # move left
                 pointer = pointer.left

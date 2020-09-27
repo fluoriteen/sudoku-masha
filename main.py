@@ -1,10 +1,11 @@
 import time
 from tests import Tests
 
-from listscache import ListsCacheSolution
-from bitwisecache import BitwiseCacheSolution
+from listscache import BruteforceSolution
+from bitwisecache import BitwiseSolution
+from dlx import DLXSolution
 
-class SudokuBacktracking :
+class Sudoku :
     def __init__(self, clues: dict, name = '', root_n = 3) :
         self.root_n = root_n
         self.n = root_n**2
@@ -14,8 +15,9 @@ class SudokuBacktracking :
         self.is_solved = False
 
         self.processors = {
-            'listscache': ListsCacheSolution,
-            'bitwisecache': BitwiseCacheSolution
+            'bruteforce': BruteforceSolution,
+            'bitwise': BitwiseSolution,
+            'dlx': DLXSolution
         }
 
         # analysis
@@ -23,7 +25,13 @@ class SudokuBacktracking :
         # - solving timing
         # - count choose (recursive calls)
         # - count unchoose
-        self.metrics = [0, 0, 0, 0]
+        self.metrics = {
+            'preprocessing': 0,
+            'solving': 0,
+            'total': 0,
+            'count_choose': 0,
+            'count_unchoose': 0
+        }
 
 
     def display(self, processor: str) :
@@ -36,11 +44,12 @@ class SudokuBacktracking :
                 \r {self.name} / {processor}
                 \r number of clues: {len(self.clues)}
 
-                \r preprocessing time: {self.metrics[0]*1000:.3f}ms 
-                \r solving time: {self.metrics[1]:.3f}s
+                \r preprocessing time: {self.metrics['preprocessing']*1000:.3f}ms 
+                \r solving time: {self.metrics['solving']:.3f}s
+                \r total time: {self.metrics['total']:.3f}s
 
-                \r count choose: {self.metrics[2]}
-                \r count unchoose: {self.metrics[3]}
+                \r count choose: {self.metrics['count_choose']}
+                \r count unchoose: {self.metrics['count_unchoose']}
                 \r {res}''')
 
     
@@ -62,10 +71,9 @@ class SudokuBacktracking :
             self.is_solved = True
 
 
-    def solve(self, processor = 'bitwisecache') :
-        s = self.processors[processor](self.clues, self.root_n)
-        self.grid = s.grid
-        self.metrics = s.metrics
+    def solve(self, processor = 'dlx') :
+        s = self.processors[processor](self.clues, self.metrics, self.root_n)
+        self.grid, self.metrics = s.grid, s.metrics
 
         # show initial sudoku grid
         # print(s.grid.visual())
@@ -82,8 +90,9 @@ class SudokuBacktracking :
         self.validate()
         
         # record timing
-        self.metrics[1] = time.time() - ts_solving
-        self.metrics[0] = ts_solving - ts_preprocessing
+        self.metrics['solving'] = time.time() - ts_solving
+        self.metrics['preprocessing'] = ts_solving - ts_preprocessing
+        self.metrics['total'] = self.metrics['preprocessing'] + self.metrics['solving'] 
 
         # show solution
         self.display(processor)
@@ -101,6 +110,6 @@ class SudokuBacktracking :
 # ==================================================
 # ==================================================
 
-game = SudokuBacktracking(Tests.case_3, 'case 3', 3)
-game.solve('listscache')
-# game.solve('bitwisecache')
+game = Sudoku(Tests.case_5, 'case 3', 3)
+# game.solve()
+game.solve('bruteforce')
