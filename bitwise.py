@@ -1,13 +1,9 @@
-from utils.grid import Grid
-
 class BitwiseSolution :
-    def __init__(self, clues: dict, metrics: dict, root_n = 3) :
-        self.root_n = root_n
-        self.n = root_n**2
+    def __init__(self, grid, metrics: dict) :
+        self.root_n = grid.root_n
+        self.n = grid.n
 
-        self.grid = Grid(root_n, clues)
-        self.clues = clues
-        self.idx_map = {}
+        self.grid = grid
         self.metrics = metrics
         self.is_finished = False
 
@@ -18,21 +14,13 @@ class BitwiseSolution :
 
 
     def preprocess(self) :
-        for row in range(self.n) :
-            for col in range(self.n) :
-                coord = f"{row+1} {col+1}"
-                idx = row * self.n + col
-                box = row // self.root_n * self.root_n + col // self.root_n
-
-                self.idx_map.update({idx: [row, col, box]})
-
-                if coord in self.clues :
-                    clue = self.clues[coord]
-                    self.grid.arr[idx] = clue
-                    self.r_cache[row] |= 1<<(clue-1)
-                    self.c_cache[col] |= 1<<(clue-1)
-                    self.b_cache[box] |= 1<<(clue-1)
-
+        for idx in self.grid.clues :
+            clue = int(self.grid.arr[idx])
+            row, col, box = self.grid.mapping[idx]
+            self.r_cache[row] |= 1<<(clue-1)
+            self.c_cache[col] |= 1<<(clue-1)
+            self.b_cache[box] |= 1<<(clue-1)
+                    
             
     def solve(self, idx: int) :
         self.metrics['count_choose'] += 1
@@ -42,7 +30,7 @@ class BitwiseSolution :
             self.is_finished = True
             return self.is_finished
 
-        row, col, box = self.idx_map[idx]
+        row, col, box = self.grid.mapping[idx]
 
         if self.grid.arr[idx] == 0:
             for k in range(1,self.n+1) :

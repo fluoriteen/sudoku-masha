@@ -87,5 +87,5 @@ class Sudoku :
 # ==================================================
 # ==================================================
 
-game = Sudoku(Tests9x9[15], 'case 13', 9)
-game.solve('bruteforce')
+game = Sudoku(Tests9x9[0], 'case 13', 9)
+game.solve('bitwise')
