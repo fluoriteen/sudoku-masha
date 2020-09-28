@@ -35,8 +35,8 @@ class Sudoku :
         if show_result :
             res = self.grid.visual() if self.is_solved else 'No solution found'
 
-        print(f''' 
-                \r {self.name} / {processor}
+        print(f''' =====================================================
+                \r {self.name} / {self.grid.n}x{self.grid.n} / {processor}
                 \r number of clues: {len(self.grid.clues)}
 
                 \r preprocessing time: {self.metrics['preprocessing']*1000:.3f}ms 
@@ -52,12 +52,12 @@ class Sudoku :
         s = self.solvers[solver](self.grid, self.metrics)
         self.metrics = s.metrics
 
+        # show initial sudoku grid
+        # print(s.grid.visual())
+
         # pre-process
         ts_preprocessing = time.time()
         s.preprocess()
-
-        # show initial sudoku grid
-        # print(s.grid.visual())
           
         # solve sudoku
         ts_solving = time.time()
@@ -80,9 +80,12 @@ class Sudoku :
 
 # ==================================================
 # ==================================================
-counter = 1
 for t in range(len(Tests9x9)):
-    game = Sudoku(Tests9x9[t], f"case {t}", 9)
+    game = Sudoku(Tests9x9[t], f"case {t}")
+    game.solve()
+
+for t in range(len(Tests16x16)):
+    game = Sudoku(Tests16x16[t], f"case {t}")
     game.solve()
 
 

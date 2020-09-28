@@ -4,20 +4,20 @@ import math
 
 class Grid :
     def __init__(self, values: str, n = 9) :
+        self.arr = [int(x) for x in values.split(' ')]
 
         # size
-        n = math.sqrt(len(values)) if len(values) != 0 else n
+        n = math.sqrt(len(self.arr)) if len(self.arr) != 0 else n
         self.n = int(n)
         self.root_n = int(math.sqrt(n))
 
         if n != self.n :
-            raise Exception(f'Grid is not square!')
+            raise Exception(f'Grid is not square! Test case length: {n}')
         
         # cell values
-        self.arr = [0] * self.n**2
         self.mapping = [None] * self.n**2
         self.clues = {}
-        self.preprocess(values)
+        self.preprocess(self.arr)
 
         # display configs
         self.span = self.root_n // 2
@@ -42,12 +42,8 @@ class Grid :
 
             self.mapping[idx] = [row, col, box]
 
-            if len(values) != 0 :
-                val = int(values[idx])
-                self.arr[idx] = val
-                
-                if val != 0 :
-                    self.clues.update({idx: True})
+            if len(values) != 0 and values[idx] != 0:
+                self.clues.update({idx: True})
     
 
     def validate(self) -> bool:
