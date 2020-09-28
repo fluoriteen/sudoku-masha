@@ -1,13 +1,11 @@
-from utils.grid import Grid
 from utils.llist import Header, DoubleLinkedList
       
 class DLXSolution :
-    def __init__(self, clues: dict, metrics: dict, root_n = 3) :
-        self.root_n = root_n
-        self.n = root_n**2
+    def __init__(self, grid, metrics: dict) :
+        self.root_n = grid.root_n
+        self.n = grid.n
 
-        self.grid = Grid(root_n, clues)
-        self.clues = clues
+        self.grid = grid
         self.metrics = metrics
         self.is_finished = False
 
@@ -24,7 +22,7 @@ class DLXSolution :
             # move right
             pointer = pointer.right
             while pointer.col != col :
-                # hide all node's links to up and down nodes
+                # re-link node's up and down neighbors
                 pointer.down.up = pointer.up
                 pointer.up.down = pointer.down
                 pointer.col.size -= 1
@@ -72,7 +70,7 @@ class DLXSolution :
         return col
 
 
-    def get_token(self, col: Header) -> dict:
+    def get_value(self, col: Header) -> dict:
         constraint, tokens = col.name.split(':')
         return {constraint: [int(x) for x in tokens.split(' ')]}
     
@@ -85,34 +83,24 @@ class DLXSolution :
         c_cache = [[False]*(self.n+1) for _ in rng]
         b_cache = [[False]*(self.n+1) for _ in rng]
 
-        self.cache = DoubleLinkedList(self.clues)
-        self.idx_map = {}
+        self.cache = DoubleLinkedList()
 
         # fill caches
-        for row in rng :
-            i = row * self.n
-            b = row // self.root_n * self.root_n
-            for col in rng :
-                idx = i + col
-                box = b + col // self.root_n
-                coord = f"{row+1} {col+1}"
+        for idx in range(self.n**2) :
+            row, col, box = self.grid.mapping[idx]
 
-                self.idx_map.update({idx: [row, col, box]})
+            if idx in self.grid.clues:
+                clue = int(self.grid.arr[idx])
+                if r_cache[row][clue] or c_cache[col][clue] or b_cache[box][clue] :
+                    raise Exception(f'Duplicates found. Conflict at: {row} {col}')
 
-                if coord in self.clues :
-                    clue = self.clues[coord]
-                    self.grid.arr[idx] = clue
-
-                    if r_cache[row][clue] or c_cache[col][clue] or b_cache[box][clue] :
-                        raise Exception(f'Duplicates found. Conflict at: {coord}')
-
-                    r_cache[row][clue] = True
-                    c_cache[col][clue] = True
-                    b_cache[box][clue] = True
-                    
-                else :
-                    self.cache.add_header(f"p:{idx}")
-                    
+                r_cache[row][clue] = True
+                c_cache[col][clue] = True
+                b_cache[box][clue] = True
+            
+            else :
+                self.cache.add_header(f"p:{idx}")
+                           
         # generate headers for rows, cols, boxes
         for digit in rng :
             for clue in rng1 :
@@ -127,7 +115,7 @@ class DLXSolution :
         for idx in range(self.n**2) :
             if not self.grid.arr[idx] :
                 for clue in rng1 :
-                    row, col, box = self.idx_map[idx]
+                    row, col, box = self.grid.mapping[idx]
                     if (r_cache[row][clue] or c_cache[col][clue] or b_cache[box][clue]) == False :
                         self.cache.rows += [
                             self.cache.add_cell(f"p:{idx}"),
@@ -153,13 +141,13 @@ class DLXSolution :
             pointer = col.down
             while pointer != col :
                 state = {}
-                state.update(self.get_token(col))
+                state.update(self.get_value(col))
 
                 # move right
                 pointer = pointer.right
                 while pointer.col != col :
                     self.cover(pointer.col)
-                    state.update(self.get_token(pointer.col))
+                    state.update(self.get_value(pointer.col))
                     pointer = pointer.right
 
                 idx = state['p'][0]
@@ -167,7 +155,7 @@ class DLXSolution :
                 # choose // add current state to solution
                 self.metrics['count_choose'] += 1
                 self.grid.arr[idx] = state['r'][1]
-                # self.grid.show_step(0.03)
+                # self.grid.show_step()
                 
                 # explore further, increasing depth
                 if self.solve(depth + 1) : break
@@ -175,7 +163,7 @@ class DLXSolution :
                 # unchoose // remove current state from solution
                 self.metrics['count_unchoose'] += 1
                 self.grid.arr[idx] = 0
-                # self.grid.show_step(0.03)
+                # self.grid.show_step()
 
                 # move left
                 pointer = pointer.left

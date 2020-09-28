@@ -88,4 +88,4 @@ class Sudoku :
 # ==================================================
 
 game = Sudoku(Tests9x9[0], 'case 13', 9)
-game.solve('bitwise')
+game.solve('dlx')

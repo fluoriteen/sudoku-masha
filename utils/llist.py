@@ -18,7 +18,7 @@ class Cell(Node):
 
 
 class DoubleLinkedList: 
-    def __init__(self, values) :
+    def __init__(self) :
         self.head = Header('root')
         self.head.up, self.head.down = self.head, self.head
         self.tail = self.head
