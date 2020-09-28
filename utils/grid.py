@@ -1,15 +1,27 @@
 import sys
 import time
-class Grid :
-    def __init__(self, root_n: int, values = {}) :
-        self.root_n = root_n
-        self.n = root_n**2
-        self.arr = [0] * root_n**4
-        self.values = values
+import math
 
+class Grid :
+    def __init__(self, values: str, n = 9) :
+        self.arr = [int(x) for x in values.split(' ')]
+
+        # size
+        n = math.sqrt(len(self.arr)) if len(self.arr) != 0 else n
+        self.n = int(n)
+        self.root_n = int(math.sqrt(n))
+
+        if n != self.n :
+            raise Exception(f'Grid is not square! Test case length: {n}')
+        
+        # cell values
+        self.mapping = [None] * self.n**2
+        self.clues = {}
+        self.preprocess(self.arr)
+
+        # display configs
         self.span = self.root_n // 2
         self.no_val = (self.span-1)*' ' + '-'
-        
         self.formatters = {
             'header': '\033[95m',
             'blue': '\033[94m',
@@ -20,7 +32,36 @@ class Grid :
             'underline': '\033[4m',
             'endf': '\033[0m'
         }
+
+
+    def preprocess(self, values: str) : 
+        for idx in range(self.n**2) :
+            row = idx // self.n
+            col = idx % self.n
+            box = row // self.root_n * self.root_n + col // self.root_n
+
+            self.mapping[idx] = [row, col, box]
+
+            if len(values) != 0 and values[idx] != 0:
+                self.clues.update({idx: True})
     
+
+    def validate(self) -> bool:
+        # referral sum is the sum of all candidates appearing in each row (col, box)
+        # it's the sum of first n items of arithmetic progression: 1..n 
+        ref_sum = int(0.5 * (1 + self.n) * self.n)
+        
+
+        for i in range(self.n) :
+            row_sum = 0
+            for j in range(self.n) :
+                row_sum += self.arr[(i * self.n) + j]
+            
+            if row_sum != ref_sum :
+                return False
+
+            return True
+
 
     def format(self, val: str, *args) -> str :
         output = ''
@@ -37,13 +78,13 @@ class Grid :
         return output
 
 
-    def str_value(self, idx: int, row: int, col: int) -> str :
-        key = f"{row} {col}"
+    def str_value(self, idx: int) -> str : 
+        val = f"{self.arr[idx]:>{self.span}d}" 
+
+        if idx in self.clues :
+            return self.format(val, 'bold', 'yellow')
         
-        if key in self.values :
-            return self.format(f"{self.values[key]:>{self.span}d}", 'bold', 'yellow')
-        
-        return self.format(f"{self.arr[idx]:>{self.span}d}", 'bold', 'blue') if self.arr[idx] != 0 else self.no_val
+        return self.format(val, 'bold', 'blue') if self.arr[idx] != 0 else self.no_val
 
 
     def str_index(self, show: bool, idx: int) -> str :
@@ -75,13 +116,13 @@ class Grid :
 
         str_row = ''
         for i in range(self.n**2) :            
-            
-            row = i // self.n + 1
-            col = i % self.n + 1
+            row, col, box = self.mapping[i]
+            row += 1
+            col += 1
 
             str_row += str_col_sep * (col != 1 and (col-1) % self.root_n == 0) 
 
-            value = self.str_value(i, row, col)
+            value = self.str_value(i)
             index = self.str_index(with_index, i)
             coord = self.str_coord(with_coord, row, col)
             
@@ -94,3 +135,7 @@ class Grid :
                 str_row = ''
 
         return str_res
+
+
+    def clear(self) :
+        self.arr = [0]*self.n**2
