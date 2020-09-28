@@ -1,5 +1,5 @@
 class BruteforceSolution :
-    def __init__(self, grid, metrics: dict) :
+    def __init__(self, grid, metrics: dict, play: bool) :
         self.root_n = grid.root_n
         self.n = grid.n
  
@@ -12,6 +12,9 @@ class BruteforceSolution :
         self.r_cache = [[False]*(self.n+1) for _ in r]
         self.c_cache = [[False]*(self.n+1) for _ in r]
         self.b_cache = [[False]*(self.n+1) for _ in r]
+
+        # print iteratively
+        self.play = play
 
 
     def preprocess(self) :
@@ -37,10 +40,10 @@ class BruteforceSolution :
             for k in range(1,self.n+1) :
 
                 # display iterations of candidate selection
-                #
-                # self.grid.arr[idx] = k
-                # self.grid.show_step(0.05)
-                # self.grid.arr[idx] = 0
+                if self.play :
+                    self.grid.arr[idx] = k
+                    self.grid.show_step()
+                    self.grid.arr[idx] = 0
 
                 if (self.r_cache[row][k] or self.c_cache[col][k] or self.b_cache[box][k]) == False :
                  
