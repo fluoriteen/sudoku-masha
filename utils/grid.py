@@ -101,7 +101,7 @@ class Grid :
         return self.format(f"({row},{col})", 'green')
    
 
-    def show_step(self, interval = 0.1) :
+    def show_step(self, interval = 0.2) :
         print(self.visual())
         print('\r')
         time.sleep(interval)

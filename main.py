@@ -48,8 +48,8 @@ class Sudoku :
                 \r {res}''')
 
 
-    def solve(self, solver = 'dlx') :
-        s = self.solvers[solver](self.grid, self.metrics)
+    def solve(self, solver = 'dlx', show_iteration = False) :
+        s = self.solvers[solver](self.grid, self.metrics, show_iteration)
         self.metrics = s.metrics
 
         # show initial sudoku grid
@@ -72,7 +72,7 @@ class Sudoku :
         self.metrics['total'] = self.metrics['preprocessing'] + self.metrics['solving'] 
 
         # show solution
-        self.display(solver, False)
+        self.display(solver)
 
         # clear solution
         self.grid.clear()
@@ -80,17 +80,17 @@ class Sudoku :
 
 # ==================================================
 # ==================================================
-for t in range(len(Tests9x9)):
-    game = Sudoku(Tests9x9[t], f"case {t}")
-    game.solve()
+# for t in range(len(Tests9x9)):
+#     game = Sudoku(Tests9x9[t], f"case {t}")
+#     game.solve()
 
-for t in range(len(Tests16x16)):
-    game = Sudoku(Tests16x16[t], f"case {t}")
-    game.solve()
+# for t in range(len(Tests16x16)):
+#     game = Sudoku(Tests16x16[t], f"case {t}")
+#     game.solve()
 
 
 # ==================================================
 # ==================================================
 
-# game = Sudoku(Tests9x9[0], 'case 13', 9)
-# game.solve('dlx')
+game = Sudoku(Tests16x16[0], 'case 13')
+game.solve('dlx', True)

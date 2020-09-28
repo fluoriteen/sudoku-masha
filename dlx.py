@@ -1,13 +1,16 @@
 from utils.llist import Header, DoubleLinkedList
       
 class DLXSolution :
-    def __init__(self, grid, metrics: dict) :
+    def __init__(self, grid, metrics: dict, play: bool) :
         self.root_n = grid.root_n
         self.n = grid.n
 
         self.grid = grid
         self.metrics = metrics
         self.is_finished = False
+
+        # print iteratively
+        self.play = play
 
 
     def cover(self, col: Header) :
@@ -155,7 +158,7 @@ class DLXSolution :
                 # choose // add current state to solution
                 self.metrics['count_choose'] += 1
                 self.grid.arr[idx] = state['r'][1]
-                # self.grid.show_step()
+                if self.play: self.grid.show_step(0.03)
                 
                 # explore further, increasing depth
                 if self.solve(depth + 1) : break
@@ -163,7 +166,7 @@ class DLXSolution :
                 # unchoose // remove current state from solution
                 self.metrics['count_unchoose'] += 1
                 self.grid.arr[idx] = 0
-                # self.grid.show_step()
+                if self.play: self.grid.show_step(0.03)
 
                 # move left
                 pointer = pointer.left
