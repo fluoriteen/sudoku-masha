@@ -29,11 +29,11 @@ class Sudoku :
         }
 
 
-    def display(self, processor: str) :
-        res = 'No solution found'
+    def display(self, processor: str, show_result = True) :
+        res = ''
 
-        if self.is_solved :
-            res = self.grid.visual()
+        if show_result :
+            res = self.grid.visual() if self.is_solved else 'No solution found'
 
         print(f''' 
                 \r {self.name} / {processor}
@@ -57,7 +57,7 @@ class Sudoku :
         s.preprocess()
 
         # show initial sudoku grid
-        print(s.grid.visual())
+        # print(s.grid.visual())
           
         # solve sudoku
         ts_solving = time.time()
@@ -72,20 +72,22 @@ class Sudoku :
         self.metrics['total'] = self.metrics['preprocessing'] + self.metrics['solving'] 
 
         # show solution
-        self.display(solver)
+        self.display(solver, False)
+
+        # clear solution
+        self.grid.clear()
+
+
+# ==================================================
+# ==================================================
+counter = 1
+for t in range(len(Tests9x9)):
+    game = Sudoku(Tests9x9[t], f"case {t}", 9)
+    game.solve()
 
 
 # ==================================================
 # ==================================================
 
-# for name in dir(Tests):
-#     if not name.startswith('__') :
-#         game = SudokuBacktracking(getattr(Tests, name), name)
-#         game.solve()
-
-
-# ==================================================
-# ==================================================
-
-game = Sudoku(Tests9x9[0], 'case 13', 9)
-game.solve('dlx')
+# game = Sudoku(Tests9x9[0], 'case 13', 9)
+# game.solve('dlx')

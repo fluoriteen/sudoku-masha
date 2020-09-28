@@ -139,3 +139,7 @@ class Grid :
                 str_row = ''
 
         return str_res
+
+
+    def clear(self) :
+        self.arr = [0]*self.n**2
