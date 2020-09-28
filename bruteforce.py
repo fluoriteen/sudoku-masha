@@ -1,13 +1,9 @@
-from utils.grid import Grid
-
 class BruteforceSolution :
-    def __init__(self, clues: dict, metrics: dict, root_n = 3) :
-        self.root_n = root_n
-        self.n = root_n**2
-
-        self.grid = Grid(root_n, clues)
-        self.clues = clues
-        self.idx_map = {}
+    def __init__(self, grid, metrics: dict) :
+        self.root_n = grid.root_n
+        self.n = grid.n
+ 
+        self.grid = grid
         self.metrics = metrics
         self.is_finished = False
 
@@ -19,24 +15,13 @@ class BruteforceSolution :
 
 
     def preprocess(self) :
-        for row in range(self.n) :
-            i = row * self.n
-            b = row // self.root_n * self.root_n
-
-            for col in range(self.n) :
-                coord = f"{row+1} {col+1}"
-                idx = i + col
-                box = b + col // self.root_n
-
-                self.idx_map.update({idx: [row, col, box]})
-
-                if coord in self.clues :
-                    clue = self.clues[coord]
-                    self.grid.arr[idx] = clue
-                    self.r_cache[row][clue] = True
-                    self.c_cache[col][clue] = True
-                    self.b_cache[box][clue] = True
-
+        for idx in self.grid.clues :
+            clue = int(self.grid.arr[idx])
+            row, col, box = self.grid.mapping[idx]
+            self.r_cache[row][clue] = True
+            self.c_cache[col][clue] = True
+            self.b_cache[box][clue] = True
+                
 
     def solve(self, idx: int) :
         self.metrics['count_choose'] += 1
@@ -46,15 +31,15 @@ class BruteforceSolution :
             self.is_finished = True
             return self.is_finished
 
-        row, col, box = self.idx_map[idx]
+        row, col, box = self.grid.mapping[idx]
 
         if self.grid.arr[idx] == 0:
             for k in range(1,self.n+1) :
 
                 # display iterations of candidate selection
-
+                #
                 # self.grid.arr[idx] = k
-                # self.grid.show_step()
+                # self.grid.show_step(0.05)
                 # self.grid.arr[idx] = 0
 
                 if (self.r_cache[row][k] or self.c_cache[col][k] or self.b_cache[box][k]) == False :
