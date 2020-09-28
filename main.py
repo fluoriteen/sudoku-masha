@@ -4,18 +4,16 @@ from bruteforce import BruteforceSolution
 from bitwise import BitwiseSolution
 from dlx import DLXSolution
 
-from utils.tests import Tests
+from utils.grid import Grid
+from tests.tests import *
 
 class Sudoku :
-    def __init__(self, clues: dict, name = '', root_n = 3) :
-        self.root_n = root_n
-        self.n = root_n**2
-
+    def __init__(self, values: str, name = '', n = 9) :
+        self.grid = Grid(values)
         self.name = name
-        self.clues = clues
         self.is_solved = False
 
-        self.processors = {
+        self.solvers = {
             'bruteforce': BruteforceSolution,
             'bitwise': BitwiseSolution,
             'dlx': DLXSolution
@@ -39,7 +37,7 @@ class Sudoku :
 
         print(f''' 
                 \r {self.name} / {processor}
-                \r number of clues: {len(self.clues)}
+                \r number of clues: {len(self.grid.clues)}
 
                 \r preprocessing time: {self.metrics['preprocessing']*1000:.3f}ms 
                 \r solving time: {self.metrics['solving']:.3f}s
@@ -49,43 +47,24 @@ class Sudoku :
                 \r count unchoose: {self.metrics['count_unchoose']}
                 \r {res}''')
 
-    
-    def validate(self) :
-        # referral sum is the sum of all candidates appearing in each row (col, box)
-        # it's the sum of first n items of arithmetic progression: 1..n 
-        ref_sum = int(0.5 * (1 + self.n) * self.n)
-        
 
-        for i in range(self.n) :
-            row_sum = 0
-            for j in range(self.n) :
-                row_sum += self.grid.arr[(i * self.n) + j]
-            
-            if row_sum != ref_sum :
-                self.is_solved = False
-                return False
-
-            self.is_solved = True
-            return True
-
-
-    def solve(self, processor = 'dlx') :
-        s = self.processors[processor](self.clues, self.metrics, self.root_n)
-        self.grid, self.metrics = s.grid, s.metrics
-
-        # show initial sudoku grid
-        print(s.grid.visual())
+    def solve(self, solver = 'dlx') :
+        s = self.solvers[solver](self.grid, self.metrics)
+        self.metrics = s.metrics
 
         # pre-process
         ts_preprocessing = time.time()
         s.preprocess()
+
+        # show initial sudoku grid
+        print(s.grid.visual())
           
         # solve sudoku
         ts_solving = time.time()
         s.solve(0)
 
         # check solution
-        self.validate()
+        self.is_solved = self.grid.validate()
         
         # record timing
         self.metrics['solving'] = time.time() - ts_solving
@@ -93,7 +72,7 @@ class Sudoku :
         self.metrics['total'] = self.metrics['preprocessing'] + self.metrics['solving'] 
 
         # show solution
-        self.display(processor)
+        self.display(solver)
 
 
 # ==================================================
@@ -108,5 +87,5 @@ class Sudoku :
 # ==================================================
 # ==================================================
 
-game = Sudoku(Tests.case_13, 'case 13', 4)
-game.solve()
+game = Sudoku(Tests9x9[15], 'case 13', 9)
+game.solve('bruteforce')
