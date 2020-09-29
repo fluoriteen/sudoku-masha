@@ -30,6 +30,7 @@ class Sudoku :
 
 
     def display(self, processor: str, show_result = True) :
+        global results
         res = ''
 
         if show_result :
@@ -80,8 +81,9 @@ class Sudoku :
 
 # ==================================================
 # ==================================================
-# for t in range(len(Tests9x9)):
-#     game = Sudoku(Tests9x9[t], f"case {t}")
+ 
+# for t in range(42, 94):
+#     game = Sudoku(Tests9x9[t], f"case_{t}")
 #     game.solve('bruteforce')
 
 # for t in range(len(Tests16x16)):
@@ -89,9 +91,13 @@ class Sudoku :
 #     game.solve()
 
 
+# dlx_results_file = open('tests/bruteforce_results.txt', 'w')
+# [dlx_results_file.writelines(result) for result in results]
+# dlx_results_file.close()
+
+
 # ==================================================
 # ==================================================
 
-game = Sudoku(Tests9x9[5], 'case 5')
-# game.solve('dlx', True)
-game.solve('bitwise')
+game = Sudoku(Tests16x16[0], '16x16')
+game.solve('dlx', True)
