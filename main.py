@@ -30,7 +30,6 @@ class Sudoku :
 
 
     def display(self, processor: str, show_result = True) :
-        global results
         res = ''
 
         if show_result :
@@ -86,8 +85,8 @@ class Sudoku :
 #     game = Sudoku(Tests9x9[t], f"case_{t}")
 #     game.solve('bruteforce')
 
-# for t in range(len(Tests16x16)):
-#     game = Sudoku(Tests16x16[t], f"case {t}")
+# for t in range(len(Tests9x9)):
+#     game = Sudoku(Tests9x9[t], f"case {t}")
 #     game.solve()
 
 
@@ -99,5 +98,5 @@ class Sudoku :
 # ==================================================
 # ==================================================
 
-game = Sudoku(Tests16x16[0], '16x16')
-game.solve('dlx', True)
+game = Sudoku(Tests9x9[0], '9x9')
+game.solve('dlx', False)

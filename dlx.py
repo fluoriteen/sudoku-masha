@@ -5,6 +5,7 @@ class DLXSolution :
         self.root_n = grid.root_n
         self.n = grid.n
 
+        self.cache = DoubleLinkedList()
         self.grid = grid
         self.metrics = metrics
         self.is_finished = False
@@ -80,12 +81,9 @@ class DLXSolution :
 
     def preprocess(self) :
         # rows, cols, boxes and positions list caches
-        rng = range(self.n)
         r_cache = [0]*self.n
         c_cache = [0]*self.n
         b_cache = [0]*self.n
-
-        self.cache = DoubleLinkedList()
 
         # fill caches
         for idx in range(self.n**2) :
@@ -103,7 +101,9 @@ class DLXSolution :
             
             else :
                 self.cache.add_header(f"p:{idx}")
-                           
+
+
+        rng = range(self.n)                
         # generate headers for rows, cols, boxes
         for digit in rng :
             for bit in rng : 
