@@ -81,7 +81,6 @@ class DLXSolution :
     def preprocess(self) :
         # rows, cols, boxes and positions list caches
         rng = range(self.n)
-        rng1 = range(1, self.n + 1)
         r_cache = [0]*self.n
         c_cache = [0]*self.n
         b_cache = [0]*self.n
