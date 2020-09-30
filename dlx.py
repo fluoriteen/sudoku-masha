@@ -82,9 +82,9 @@ class DLXSolution :
         # rows, cols, boxes and positions list caches
         rng = range(self.n)
         rng1 = range(1, self.n + 1)
-        r_cache = [[False]*(self.n+1) for _ in rng]
-        c_cache = [[False]*(self.n+1) for _ in rng]
-        b_cache = [[False]*(self.n+1) for _ in rng]
+        r_cache = [0]*self.n
+        c_cache = [0]*self.n
+        b_cache = [0]*self.n
 
         self.cache = DoubleLinkedList()
 
@@ -93,38 +93,42 @@ class DLXSolution :
             row, col, box = self.grid.mapping[idx]
 
             if idx in self.grid.clues:
-                clue = int(self.grid.arr[idx])
-                if r_cache[row][clue] or c_cache[col][clue] or b_cache[box][clue] :
+                clue = 2 ** (self.grid.arr[idx] - 1)
+
+                if (r_cache[row] & clue) + (c_cache[col] & clue) + (b_cache[box] & clue) != 0 :
                     raise Exception(f'Duplicates found. Conflict at: {row} {col}')
 
-                r_cache[row][clue] = True
-                c_cache[col][clue] = True
-                b_cache[box][clue] = True
+                r_cache[row] |= clue
+                c_cache[col] |= clue
+                b_cache[box] |= clue
             
             else :
                 self.cache.add_header(f"p:{idx}")
                            
         # generate headers for rows, cols, boxes
         for digit in rng :
-            for clue in rng1 :
-                if not r_cache[digit][clue] :
-                    self.cache.add_header(f"r:{digit} {clue}")
-                if not c_cache[digit][clue] :
-                    self.cache.add_header(f"c:{digit} {clue}")
-                if not b_cache[digit][clue] :
-                    self.cache.add_header(f"b:{digit} {clue}")
-  
+            for bit in rng : 
+                clue = 2**bit
+                if r_cache[digit] & clue == 0:
+                    self.cache.add_header(f"r:{digit} {bit+1}")
+                if c_cache[digit] & clue == 0 :
+                    self.cache.add_header(f"c:{digit} {bit+1}")
+                if b_cache[digit] & clue == 0 :
+                    self.cache.add_header(f"b:{digit} {bit+1}")
+
         # generate rows
         for idx in range(self.n**2) :
             if not self.grid.arr[idx] :
-                for clue in rng1 :
-                    row, col, box = self.grid.mapping[idx]
-                    if (r_cache[row][clue] or c_cache[col][clue] or b_cache[box][clue]) == False :
+                row, col, box = self.grid.mapping[idx]
+                
+                for bit in rng :
+                    clue = 2**bit
+                    if (r_cache[row] & clue) + (c_cache[col] & clue) + (b_cache[box] & clue) == 0 :
                         self.cache.rows += [
                             self.cache.add_cell(f"p:{idx}"),
-                            self.cache.add_cell(f"r:{row} {clue}"),
-                            self.cache.add_cell(f"c:{col} {clue}"),
-                            self.cache.add_cell(f"b:{box} {clue}")
+                            self.cache.add_cell(f"r:{row} {bit+1}"),
+                            self.cache.add_cell(f"c:{col} {bit+1}"),
+                            self.cache.add_cell(f"b:{box} {bit+1}")
                         ]
 
         # link circles inside rows
