@@ -8,7 +8,7 @@ class DLXSolution :
         self.cache = DoubleLinkedList()
         self.grid = grid
         self.metrics = metrics
-        self.is_finished = False
+        self.solutions = []
 
         # print iteratively
         self.play = play
@@ -136,7 +136,7 @@ class DLXSolution :
 
     def solve(self, depth: int) :
         if self.cache.head.right == self.cache.head :
-            self.is_finished = True
+            self.solutions += [self.grid.arr.copy()]
             return True
         
         else :
@@ -164,7 +164,7 @@ class DLXSolution :
                 if self.play: self.grid.show_step(0.03)
                 
                 # explore further, increasing depth
-                if self.solve(depth + 1) : break
+                self.solve(depth + 1)
 
                 # unchoose // remove current state from solution
                 self.metrics['count_unchoose'] += 1
@@ -180,5 +180,5 @@ class DLXSolution :
                 # move down
                 pointer = pointer.down
 
-        self.uncover(col)
-        return self.is_finished
+            self.uncover(col)
+            return False

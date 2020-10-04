@@ -5,7 +5,7 @@ class BruteforceSolution :
  
         self.grid = grid
         self.metrics = metrics
-        self.is_finished = False
+        self.solutions = []
 
         # rows, cols and boxes list caches
         r = range(self.n)
@@ -31,39 +31,41 @@ class BruteforceSolution :
 
         # if we're out of sudoku array - finish and quit recursion
         if idx > self.n**2 - 1 :
-            self.is_finished = True
-            return self.is_finished
+            self.solutions += [self.grid.arr.copy()]
+            return True
 
-        row, col, box = self.grid.mapping[idx]
+        else :
+            row, col, box = self.grid.mapping[idx]
 
-        if self.grid.arr[idx] == 0:
-            for k in range(1,self.n+1) :
+            if self.grid.arr[idx] == 0:
+                for k in range(1,self.n+1) :
 
-                # display iterations of candidate selection
-                if self.play :
-                    self.grid.arr[idx] = k
-                    self.grid.show_step()
-                    self.grid.arr[idx] = 0
+                    # display iterations of candidate selection
+                    if self.play :
+                        self.grid.arr[idx] = k
+                        self.grid.show_step()
+                        self.grid.arr[idx] = 0
 
-                if (self.r_cache[row][k] or self.c_cache[col][k] or self.b_cache[box][k]) == False :
-                 
-                    # choose
-                    self.grid.arr[idx] = k
-                    self.r_cache[row][k] = True
-                    self.c_cache[col][k] = True
-                    self.b_cache[box][k] = True
+                    if (self.r_cache[row][k] or self.c_cache[col][k] or self.b_cache[box][k]) == False :
+                    
+                        # choose
+                        self.grid.arr[idx] = k
+                        self.r_cache[row][k] = True
+                        self.c_cache[col][k] = True
+                        self.b_cache[box][k] = True
 
-                    # explore and break if exploring returned True
-                    if self.solve(idx+1) : break
-                    self.metrics['count_unchoose'] += 1
+                        # explore and break if exploring returned True
+                        self.solve(idx+1)
+                        self.metrics['count_unchoose'] += 1
 
-                    # unchoose
-                    self.grid.arr[idx] = 0
-                    self.r_cache[row][k] = False
-                    self.c_cache[col][k] = False
-                    self.b_cache[box][k] = False
+                        # unchoose
+                        self.grid.arr[idx] = 0
+                        self.r_cache[row][k] = False
+                        self.c_cache[col][k] = False
+                        self.b_cache[box][k] = False
 
-            # if all 1..9 numbers were checked return current puzzle state and take step back
-            return self.is_finished
+                # if all 1..9 numbers were checked return current puzzle state and take step back
+                return False
 
-        return self.solve(idx+1)
+            self.solve(idx+1)
+            return False

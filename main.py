@@ -29,28 +29,48 @@ class Sudoku :
         }
 
 
-    def display(self, processor: str, show_result = True) :
-        res = ''
+    def validate(self) -> bool:
+        # referral sum is the sum of all candidates appearing in each row (col, box)
+        # it's the sum of first n items of arithmetic progression: 1..n 
+        n = self.grid.n
+        ref_sum = int(0.5 * (1 + n) * n)
+        
 
-        if show_result :
-            res = self.grid.visual() if self.is_solved else 'No solution found'
+        for solution in self.solutions :
+            for i in range(n) :
+                row_sum = 0
+                for j in range(n) :
+                    row_sum += solution[(i * n) + j]
+                
+                if row_sum != ref_sum :
+                    self.solutions.remove(solution)
+
+
+    def display(self, processor: str, show_result = True) :
+        count_solutions = len(self.solutions)
 
         print(f''' =====================================================
-                \r {self.name} / {self.grid.n}x{self.grid.n} / {processor}
+                \r {self.grid.n}x{self.grid.n} / {processor}
                 \r number of clues: {len(self.grid.clues)}
-
-                \r preprocessing time: {self.metrics['preprocessing']*1000:.3f}ms 
-                \r solving time: {self.metrics['solving']:.3f}s
                 \r total time: {self.metrics['total']:.3f}s
+                \r count choose: {self.metrics['count_choose']}''')
 
-                \r count choose: {self.metrics['count_choose']}
-                \r count unchoose: {self.metrics['count_unchoose']}
-                \r {res}''')
+        if count_solutions == 0 :
+            print('No solution found')
+        
+        else :
+            counter_msg = f'\n There are {count_solutions} solutions' if count_solutions > 1 else f' There is {count_solutions} solution'
+            print(counter_msg)
+            
+            self.grid.arr = self.solutions[0]
+            print(self.grid.visual())
+                
 
 
     def solve(self, solver = 'dlx', show_iteration = False) :
         s = self.solvers[solver](self.grid, self.metrics, show_iteration)
         self.metrics = s.metrics
+        self.solutions = s.solutions
 
         # show initial sudoku grid
         # print(s.grid.visual())
@@ -64,7 +84,7 @@ class Sudoku :
         s.solve(0)
 
         # check solution
-        self.is_solved = self.grid.validate()
+        self.is_solved = len(self.solutions) > 0
         
         # record timing
         self.metrics['solving'] = time.time() - ts_solving
@@ -80,13 +100,9 @@ class Sudoku :
 
 # ==================================================
 # ==================================================
- 
-# for t in range(42, 94):
-#     game = Sudoku(Tests9x9[t], f"case_{t}")
-#     game.solve('bruteforce')
 
-# for t in range(len(Tests9x9)):
-#     game = Sudoku(Tests9x9[t], f"case {t}")
+# for t in range(len(Tests9x9_2)):
+#     game = Sudoku(Tests9x9_2[t], f"case {t}")
 #     game.solve()
 
 
@@ -98,5 +114,5 @@ class Sudoku :
 # ==================================================
 # ==================================================
 
-game = Sudoku(Tests9x9[0], '9x9')
-game.solve('dlx', False)
+game = Sudoku(Tests9x9[1], '9x9')
+game.solve('bitwise', False)

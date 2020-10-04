@@ -5,7 +5,7 @@ class BitwiseSolution :
 
         self.grid = grid
         self.metrics = metrics
-        self.is_finished = False
+        self.solutions = []
 
         # integer caches for 1..9 rows, 1..9 cols, 1..9 boxes
         self.r_cache = [0]*self.n
@@ -31,41 +31,43 @@ class BitwiseSolution :
 
         # if we're out of sudoku array - finish and quit recursion
         if idx > self.n**2 - 1 :
-            self.is_finished = True
-            return self.is_finished
+            self.solutions += [self.grid.arr.copy()]
+            return True
 
-        row, col, box = self.grid.mapping[idx]
+        else :
+            row, col, box = self.grid.mapping[idx]
 
-        if self.grid.arr[idx] == 0:
-            for k in range(1,self.n+1) :
-                p = 1<<(k-1)
-                np = ~p
-                
-                # display iterations of candidate selection
-                if self.play: 
-                    self.grid.arr[idx] = k
-                    self.grid.show_step()
-                    self.grid.arr[idx] = 0
-
-                if (self.r_cache[row] & p) + (self.c_cache[col] & p) + (self.b_cache[box] & p) == 0 :
+            if self.grid.arr[idx] == 0:
+                for k in range(1,self.n+1) :
+                    p = 1<<(k-1)
+                    np = ~p
                     
-                    # choose
-                    self.grid.arr[idx] = k
-                    self.r_cache[row] |= p
-                    self.c_cache[col] |= p
-                    self.b_cache[box] |= p
+                    # display iterations of candidate selection
+                    if self.play: 
+                        self.grid.arr[idx] = k
+                        self.grid.show_step()
+                        self.grid.arr[idx] = 0
 
-                    # explore and break if exploring returned True
-                    if self.solve(idx+1) : break
-                    self.metrics['count_unchoose'] += 1
+                    if (self.r_cache[row] & p) + (self.c_cache[col] & p) + (self.b_cache[box] & p) == 0 :
+                        
+                        # choose
+                        self.grid.arr[idx] = k
+                        self.r_cache[row] |= p
+                        self.c_cache[col] |= p
+                        self.b_cache[box] |= p
 
-                    # unchoose
-                    self.grid.arr[idx] = 0
-                    self.r_cache[row] &= np
-                    self.c_cache[col] &= np
-                    self.b_cache[box] &= np
+                        # explore and break if exploring returned True
+                        self.solve(idx+1)
+                        self.metrics['count_unchoose'] += 1
 
-            # if all 1..9 numbers were checked return current puzzle state and take step back
-            return self.is_finished
+                        # unchoose
+                        self.grid.arr[idx] = 0
+                        self.r_cache[row] &= np
+                        self.c_cache[col] &= np
+                        self.b_cache[box] &= np
 
-        return self.solve(idx+1)
+                # if all 1..9 numbers were checked return current puzzle state and take step back
+                return False
+
+            self.solve(idx+1)
+            return False
