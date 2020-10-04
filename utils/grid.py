@@ -4,7 +4,8 @@ import math
 
 class Grid :
     def __init__(self, values: str, n = 9) :
-        self.arr = [int(x) for x in values.split(' ')]
+        self.values = [int(x) for x in values.split(' ')]
+        self.arr = self.values
 
         # size
         n = math.sqrt(len(self.arr)) if len(self.arr) != 0 else n
@@ -17,11 +18,18 @@ class Grid :
         # cell values
         self.mapping = [None] * self.n**2
         self.clues = {}
+        self.solutions = []
         self.preprocess(self.arr)
 
         # display configs
         self.span = self.root_n // 2
         self.no_val = (self.span-1)*' ' + '-'
+        self.separators = {
+            'row': '\n',
+            'col': '  ',
+            'band': '-' * (self.span * self.n + 2*(self.n - 1) + 3*(self.root_n - 1)) + '\n',
+            'pillar': '  |  '
+        }
         self.formatters = {
             'header': '\033[95m',
             'blue': '\033[94m',
@@ -44,23 +52,6 @@ class Grid :
 
             if len(values) != 0 and values[idx] != 0:
                 self.clues.update({idx: True})
-    
-
-    def validate(self) -> bool:
-        # referral sum is the sum of all candidates appearing in each row (col, box)
-        # it's the sum of first n items of arithmetic progression: 1..n 
-        ref_sum = int(0.5 * (1 + self.n) * self.n)
-        
-
-        for i in range(self.n) :
-            row_sum = 0
-            for j in range(self.n) :
-                row_sum += self.arr[(i * self.n) + j]
-            
-            if row_sum != ref_sum :
-                return False
-
-            return True
 
 
     def format(self, val: str, *args) -> str :
@@ -108,11 +99,8 @@ class Grid :
 
 
     def visual(self, with_coord = False, with_index = False) -> str :
-        str_row_sep = '\n'
-        str_col_sep = '     '
-        str_val_sep = '  '
         
-        str_res = str_row_sep
+        str_res = self.separators['row']
 
         str_row = ''
         for i in range(self.n**2) :            
@@ -120,22 +108,22 @@ class Grid :
             row += 1
             col += 1
 
-            str_row += str_col_sep * (col != 1 and (col-1) % self.root_n == 0) 
+            str_row += self.separators['pillar'] * (col != 1 and (col-1) % self.root_n == 0) 
 
             value = self.str_value(i)
             index = self.str_index(with_index, i)
             coord = self.str_coord(with_coord, row, col)
             
             str_row += ' '.join( filter(None, [value, coord, index]) )
-            str_row += str_val_sep * (col % self.root_n != 0)
+            str_row += self.separators['col'] * (col % self.root_n != 0)
             
             if col % self.n == 0 :
-                row_div = (row % self.root_n == 0)
-                str_res += f"{str_row}{str_row_sep * (1 + row_div)}"
+                row_div = (row % self.root_n == 0) and (row != self.n)
+                str_res += f"{str_row}{self.separators['row'] + row_div * self.separators['band']}"
                 str_row = ''
 
         return str_res
 
 
     def clear(self) :
-        self.arr = [0]*self.n**2
+        self.arr = self.values
